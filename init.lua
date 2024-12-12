@@ -280,6 +280,9 @@ require('lazy').setup({
     opts = {
       server = {
         on_attach = function(_, bufnr)
+          --OWN ADDITIONS
+          vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+          --END
           vim.keymap.set('n', '<leader>cR', function()
             vim.cmd.RustLsp 'codeAction'
           end, { desc = 'Code Action', buffer = bufnr })
@@ -307,6 +310,14 @@ require('lazy').setup({
                 ['async-recursion'] = { 'async_recursion' },
               },
             },
+            --OWN ADDITIONS
+            inlayHints = {
+              enable = true, -- Enable inlay hints
+              chainingHints = true, -- Enable chaining hints (optional)
+              typeHints = true, -- Enable type hints (optional)
+              parameterHints = true, -- Enable parameter hints (optional)
+            },
+            --ENDOF ADDITIONS
           },
         },
       },
@@ -695,6 +706,15 @@ require('lazy').setup({
         -- gopls = {},
         --pyright = {},
         rust_analyzer = { enabled = false },
+        --rust_analyzer = { implied_types = true },
+        --rust_analyzer = {
+        --  inlayHints = {
+        --    enable = true, -- Enable inlay hints
+        --    chainingHints = true, -- Enable chaining hints (optional)
+        --    typeHints = true, -- Enable type hints (optional)
+        --    parameterHints = true, -- Enable parameter hints (optional)
+        --  },
+        --},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -936,6 +956,7 @@ require('lazy').setup({
       --vim.cmd.colorscheme 'minicyan'
 
       vim.cmd.colorscheme 'habamax'
+      --vim.cmd.colorscheme 'tokyonight-night'
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
     end,
