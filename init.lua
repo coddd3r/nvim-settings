@@ -202,6 +202,16 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+--reopen files at the same position
+vim.api.nvim_create_autocmd({ 'BufReadPost' }, {
+  pattern = { '*' },
+  callback = function()
+    if vim.fn.line '\'"' > 1 and vim.fn.line '\'"' <= vim.fn.line '$' then
+      vim.cmd('normal! g\'"', false)
+    end
+  end,
+})
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -228,7 +238,9 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
-
+  'tpope/vim-obsession', -- Detect tabstop and shiftwidth automatically
+  --'mofiqul/vscode.nvim',
+  'aserowy/tmux.nvim',
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
@@ -253,6 +265,10 @@ require('lazy').setup({
       },
     },
   },
+
+  --nvim save session
+  -- { 'monokrome/vim-lazy-obsession', lazy = true },
+  ---
 
   --RUST PLUGINS
   {
@@ -988,7 +1004,14 @@ require('lazy').setup({
       --  and try some other statusline plugin
       local statusline = require 'mini.statusline'
       -- set use_icons to true if you have a Nerd Font
-      statusline.setup { use_icons = vim.g.have_nerd_font }
+      statusline.setup {
+        use_icons = vim.g.have_nerd_font,
+        content = {
+          active = function()
+            return '%{ObsessionStatus()}'
+          end,
+        },
+      }
 
       -- You can configure sections in the statusline by overriding their
       -- default behavior. For example, here we set the section for

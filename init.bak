@@ -1,26 +1,4 @@
---[[
-
-=====================================================================
-==================== READ THIS BEFORE CONTINUING ====================
-=====================================================================
-========                                    .-----.          ========
-========         .----------------------.   | === |          ========
-========         |.-""""""""""""""""""-.|   |-----|          ========
-========         ||                    ||   | === |          ========
-========         ||   KICKSTART.NVIM   ||   |-----|          ========
-========         ||                    ||   | === |          ========
-========         ||                    ||   |-----|          ========
-========         ||:Tutor              ||   |:::::|          ========
-========         |'-..................-'|   |____o|          ========
-========         `"")----------------(""`   ___________      ========
-========        /::::::::::|  |::::::::::\  \ no mouse \     ========
-========       /:::========|  |==hjkl==:::\  \ required \    ========
-========      '""""""""""""'  '""""""""""""'  '""""""""""'   ========
-========                                                     ========
-=====================================================================
-=====================================================================
-
-What is Kickstart?
+--[[What is Kickstart?
 
   Kickstart.nvim is *not* a distribution.
 
@@ -93,6 +71,11 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = false
 
+--CLANG
+--vim.g.conform_clang_format_path = '~/.config/nvim/.clang-format'
+vim.opt.formatprg = 'clang-format -style=file://' .. vim.fn.expand '~/.clang-format'
+--CLANGEND
+
 -- [[ Setting options ]]
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
@@ -131,7 +114,7 @@ vim.opt.smartcase = true
 -- Keep signcolumn on by default
 vim.opt.signcolumn = 'yes'
 
--- Decrease update time
+-- Decrease update tim
 vim.opt.updatetime = 250
 
 -- Decrease mapped sequence wait time
@@ -157,6 +140,11 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
+--local set = vim.opt -- set options
+vim.opt.tabstop = 4
+vim.opt.softtabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.sidescroll = 1
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -166,6 +154,7 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show full diagnostic message' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -189,6 +178,15 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+
+-- OWN ADDITIONS
+vim.keymap.set('v', 'J', ":m '>+1<cr>gv=gv", { silent = true })
+vim.keymap.set('v', 'K', ":m '<-2<cr>gv=gv", { silent = true })
+--
+--
+--
+--
+--
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -255,6 +253,96 @@ require('lazy').setup({
       },
     },
   },
+
+  --RUST PLUGINS
+  {
+    'Saecki/crates.nvim',
+    event = { 'BufRead Cargo.toml' },
+    opts = {
+      completion = {
+        crates = {
+          enabled = true,
+        },
+      },
+      lsp = {
+        enabled = true,
+        actions = true,
+        completion = true,
+        hover = true,
+      },
+    },
+  },
+
+  {
+    'mrcjkb/rustaceanvim',
+    version = vim.fn.has 'nvim-0.10.0' == 0 and '^4' or false,
+    ft = { 'rust' },
+    opts = {
+      server = {
+        on_attach = function(_, bufnr)
+          --OWN ADDITIONS
+          vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+          --END
+          vim.keymap.set('n', '<leader>cR', function()
+            vim.cmd.RustLsp 'codeAction'
+          end, { desc = 'Code Action', buffer = bufnr })
+          vim.keymap.set('n', '<leader>dr', function()
+            vim.cmd.RustLsp 'debuggables'
+          end, { desc = 'Rust Debuggables', buffer = bufnr })
+        end,
+        default_settings = {
+          -- rust-analyzer language server configuration
+          ['rust-analyzer'] = {
+            cargo = {
+              allFeatures = true,
+              loadOutDirsFromCheck = true,
+              buildScripts = {
+                enable = true,
+              },
+            },
+            -- Add clippy lints for Rust.
+            checkOnSave = true,
+            procMacro = {
+              enable = true,
+              ignored = {
+                ['async-trait'] = { 'async_trait' },
+                ['napi-derive'] = { 'napi' },
+                ['async-recursion'] = { 'async_recursion' },
+              },
+            },
+            --OWN ADDITIONS
+            inlayHints = {
+              enable = true, -- Enable inlay hints
+              chainingHints = true, -- Enable chaining hints (optional)
+              typeHints = true, -- Enable type hints (optional)
+              parameterHints = true, -- Enable parameter hints (optional)
+            },
+            --ENDOF ADDITIONS
+          },
+        },
+      },
+    },
+    config = function(_, opts)
+      vim.g.rustaceanvim = vim.tbl_deep_extend('keep', vim.g.rustaceanvim or {}, opts or {})
+      if vim.fn.executable 'rust-analyzer' == 0 then
+        error(
+          '**rust-analyzer** not found in PATH, please install it.\nhttps://rust-analyzer.github.io/' .. out
+          --{ title = "rustaceanvim" }
+        )
+      end
+    end,
+  },
+  {
+    'nvim-neotest/neotest',
+    optional = true,
+    opts = {
+      adapters = {
+        ['rustaceanvim.neotest'] = {},
+      },
+    },
+  },
+
+  --RUST END
 
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
@@ -614,10 +702,19 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
+        clangd = {},
         -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
+        --pyright = {},
+        rust_analyzer = { enabled = false },
+        --rust_analyzer = { implied_types = true },
+        --rust_analyzer = {
+        --  inlayHints = {
+        --    enable = true, -- Enable inlay hints
+        --    chainingHints = true, -- Enable chaining hints (optional)
+        --    typeHints = true, -- Enable type hints (optional)
+        --    parameterHints = true, -- Enable parameter hints (optional)
+        --  },
+        --},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -689,12 +786,13 @@ require('lazy').setup({
       },
     },
     opts = {
-      notify_on_error = false,
+      notify_on_error = true,
       format_on_save = function(bufnr)
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        --local disable_filetypes = { c = false, cpp = false }
+        local disable_filetypes = {}
         local lsp_format_opt
         if disable_filetypes[vim.bo[bufnr].filetype] then
           lsp_format_opt = 'never'
@@ -709,10 +807,21 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
-        --
+        --python = { 'isort', 'black' },
+        c = { 'clang_format' },
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
+      },
+      formatters = {
+        clang_format = {
+          --args = {
+          --'--style=WebKit', --WORKS
+          --},
+          args = {
+            '--style=file',
+            --'--style="{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4, NamespaceIndentation: All, FixNamespaceComments: false }"',
+          },
+        },
       },
     },
   },
@@ -844,8 +953,10 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      --vim.cmd.colorscheme 'minicyan'
 
+      vim.cmd.colorscheme 'habamax'
+      --vim.cmd.colorscheme 'tokyonight-night'
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
     end,
@@ -897,7 +1008,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'rust', 'ron' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -927,9 +1038,9 @@ require('lazy').setup({
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
