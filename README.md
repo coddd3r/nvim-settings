@@ -1,4 +1,4 @@
-# kickstart.nvim DD PERSONAL CONFIG
+# kickstart.nvim
 
 ## Introduction
 

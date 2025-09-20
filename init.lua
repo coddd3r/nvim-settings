@@ -75,7 +75,14 @@ vim.g.have_nerd_font = false
 --vim.g.conform_clang_format_path = '~/.config/nvim/.clang-format'
 vim.opt.formatprg = 'clang-format -style=file://' .. vim.fn.expand '~/.clang-format'
 --CLANGEND
-
+--
+--
+-- change background
+vim.o.background = 'dark'
+vim.g.bg = 'dark'
+--background color
+--
+--
 -- [[ Setting options ]]
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
@@ -85,7 +92,7 @@ vim.opt.formatprg = 'clang-format -style=file://' .. vim.fn.expand '~/.clang-for
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -241,6 +248,8 @@ require('lazy').setup({
   'tpope/vim-obsession', -- Detect tabstop and shiftwidth automatically
   --'mofiqul/vscode.nvim',
   'aserowy/tmux.nvim',
+  'austinliuigi/smoke.nvim',
+  'artcodespace/pax',
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
@@ -266,9 +275,53 @@ require('lazy').setup({
     },
   },
 
+  -- QUIET2
+  {
+    'veggiemonk/quiet2',
+    name = 'quiet2',
+    priority = 1000,
+    lazy = true,
+    config = function()
+      require('quiet2').setup()
+    end,
+  },
+  -- QUIET2
+  --
+  --
+  --
+  --
   --nvim save session
   -- { 'monokrome/vim-lazy-obsession', lazy = true },
   ---
+
+  --PHP/LARAVEL
+  -- {
+  --   'adalessa/laravel.nvim',
+  --   dependencies = {
+  --     'tpope/vim-dotenv',
+  --     'nvim-telescope/telescope.nvim',
+  --     'MunifTanjim/nui.nvim',
+  --     'kevinhwang91/promise-async',
+  --   },
+  --   cmd = { 'Laravel' },
+  --   keys = {
+  --     { '<leader>la', ':Laravel artisan<cr>' },
+  --     { '<leader>lr', ':Laravel routes<cr>' },
+  --     { '<leader>lm', ':Laravel related<cr>' },
+  --   },
+  --   event = { 'VeryLazy' },
+  --   opts = {
+  --     lsp_server = 'intelephense',
+  --     features = {
+  --       null_ls = {
+  --         enable = false,
+  --       },
+  --     },
+  --   },
+  --   config = true,
+  -- },
+
+  --PHP LARAVEL END
 
   --RUST PLUGINS
   {
@@ -289,76 +342,88 @@ require('lazy').setup({
     },
   },
 
-  {
-    'mrcjkb/rustaceanvim',
-    version = vim.fn.has 'nvim-0.10.0' == 0 and '^4' or false,
-    ft = { 'rust' },
-    opts = {
-      server = {
-        on_attach = function(_, bufnr)
-          --OWN ADDITIONS
-          vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-          --END
-          vim.keymap.set('n', '<leader>cR', function()
-            vim.cmd.RustLsp 'codeAction'
-          end, { desc = 'Code Action', buffer = bufnr })
-          vim.keymap.set('n', '<leader>dr', function()
-            vim.cmd.RustLsp 'debuggables'
-          end, { desc = 'Rust Debuggables', buffer = bufnr })
-        end,
-        default_settings = {
-          -- rust-analyzer language server configuration
-          ['rust-analyzer'] = {
-            cargo = {
-              allFeatures = true,
-              loadOutDirsFromCheck = true,
-              buildScripts = {
-                enable = true,
-              },
-            },
-            -- Add clippy lints for Rust.
-            checkOnSave = true,
-            procMacro = {
-              enable = true,
-              ignored = {
-                ['async-trait'] = { 'async_trait' },
-                ['napi-derive'] = { 'napi' },
-                ['async-recursion'] = { 'async_recursion' },
-              },
-            },
-            --OWN ADDITIONS
-            inlayHints = {
-              enable = true, -- Enable inlay hints
-              chainingHints = true, -- Enable chaining hints (optional)
-              typeHints = true, -- Enable type hints (optional)
-              parameterHints = true, -- Enable parameter hints (optional)
-            },
-            --ENDOF ADDITIONS
-          },
-        },
-      },
-    },
-    config = function(_, opts)
-      vim.g.rustaceanvim = vim.tbl_deep_extend('keep', vim.g.rustaceanvim or {}, opts or {})
-      if vim.fn.executable 'rust-analyzer' == 0 then
-        error(
-          '**rust-analyzer** not found in PATH, please install it.\nhttps://rust-analyzer.github.io/' .. out
-          --{ title = "rustaceanvim" }
-        )
-      end
-    end,
-  },
-  {
-    'nvim-neotest/neotest',
-    optional = true,
-    opts = {
-      adapters = {
-        ['rustaceanvim.neotest'] = {},
-      },
-    },
-  },
+  -- --RUST
+  -- {
+  --   'mrcjkb/rustaceanvim',
+  --   version = vim.fn.has 'nvim-0.10.0' == 0 and '^4' or false,
+  --   ft = { 'rust' },
+  --   opts = {
+  --     server = {
+  --       on_attach = function(_, bufnr)
+  --         --OWN ADDITIONS
+  --         --vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+  --         --END
+  --         vim.keymap.set('n', '<leader>cR', function()
+  --           vim.cmd.RustLsp 'codeAction'
+  --         end, { desc = 'Code Action', buffer = bufnr })
+  --         vim.keymap.set('n', '<leader>dr', function()
+  --           vim.cmd.RustLsp 'debuggables'
+  --         end, { desc = 'Rust Debuggables', buffer = bufnr })
+  --       end,
+  --       default_settings = {
+  --         -- rust-analyzer language server configuration
+  --         ['rust-analyzer'] = {
+  --           cargo = {
+  --             allFeatures = true,
+  --             loadOutDirsFromCheck = true,
+  --             buildScripts = {
+  --               enable = true,
+  --             },
+  --           },
+  --           -- Add clippy lints for Rust.
+  --           checkOnSave = true,
+  --           procMacro = {
+  --             enable = true,
+  --             ignored = {
+  --               ['async-trait'] = { 'async_trait' },
+  --               ['napi-derive'] = { 'napi' },
+  --               ['async-recursion'] = { 'async_recursion' },
+  --             },
+  --           },
+  --           --OWN ADDITIONS
+  --           -- inlayHints = {
+  --           --   enable = true, -- Enable inlay hints
+  --           --   chainingHints = true, -- Enable chaining hints (optional)
+  --           --   typeHints = true, -- Enable type hints (optional)
+  --           --   parameterHints = true, -- Enable parameter hints (optional)
+  --           -- },
+  --           --ENDOF ADDITIONS
+  --         },
+  --       },
+  --     },
+  --   },
+  --   config = function(_, opts)
+  --     vim.g.rustaceanvim = vim.tbl_deep_extend('keep', vim.g.rustaceanvim or {}, opts or {})
+  --     if vim.fn.executable 'rust-analyzer' == 0 then
+  --       error(
+  --         '**rust-analyzer** not found in PATH, please install it.\nhttps://rust-analyzer.github.io/' .. out
+  --         --{ title = "rustaceanvim" }
+  --       )
+  --     end
+  --   end,
+  -- },
+  -- {
+  --   'nvim-neotest/neotest',
+  --   optional = true,
+  --   opts = {
+  --     adapters = {
+  --       ['rustaceanvim.neotest'] = {},
+  --     },
+  --   },
+  -- },
 
   --RUST END
+  --MARKDOWN PREVIEW
+  {
+    'iamcco/markdown-preview.nvim',
+    cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
+    build = 'cd app && yarn install',
+    init = function()
+      vim.g.mkdp_filetypes = { 'markdown' }
+    end,
+    ft = { 'markdown' },
+  },
+  --MARKDOWN END
 
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
@@ -657,7 +722,7 @@ require('lazy').setup({
           --
           -- When you move your cursor, the highlights will be cleared (the second autocommand).
           local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
+          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
             local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
             vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
               buffer = event.buf,
@@ -684,7 +749,7 @@ require('lazy').setup({
           -- code, if the language server you are using supports them
           --
           -- This may be unwanted, since they displace some of your code
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
+          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
             map('<leader>th', function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
             end, '[T]oggle Inlay [H]ints')
@@ -721,7 +786,52 @@ require('lazy').setup({
         clangd = {},
         -- gopls = {},
         --pyright = {},
-        rust_analyzer = { enabled = false },
+        pylsp = {
+          plugins = {
+            -- Formatter options
+            black = { enabled = false },
+            autopep8 = { enabled = true },
+            yapf = { enabled = false },
+            -- Linter options
+            pylint = { enabled = true, executable = 'pylint' },
+            pyflakes = { enabled = false },
+            pycodestyle = { enabled = true },
+            -- Type checker
+            pylsp_mypy = { enabled = true },
+            -- Auto-completion options
+            jedi_completion = { fuzzy = true },
+            -- Import sorting
+            pyls_isort = { enabled = true },
+          },
+        },
+        --rust_analyzer = { enabled = false },
+        --rust_analyzer = { enabled = true },
+        rust_analyzer = {
+          settings = {
+            ['rust-analyzer'] = {
+              imports = {
+                granularity = {
+                  group = 'module',
+                },
+                prefix = 'self',
+              },
+              cargo = {
+                buildScripts = {
+                  enable = true,
+                },
+              },
+              procMacro = {
+                enable = true,
+              },
+              inlayHints = {
+                enable = true, -- Enable inlay hints
+                -- chainingHints = true, -- Enable chaining hints (optional)
+                -- typeHints = true, -- Enable type hints (optional)
+                -- parameterHints = true, -- Enable parameter hints (optional)
+              },
+            },
+          },
+        },
         --rust_analyzer = { implied_types = true },
         --rust_analyzer = {
         --  inlayHints = {
@@ -737,8 +847,18 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
+        ts_ls = {},
+        --somesass_ls = {},
         --
+        -- intelephense = {
+        --   filetypes = { 'php' },
+        --   environment = {
+        --     includePaths = { 'vendor' }, -- Laravel vendor folder
+        --   },
+        --   files = {
+        --     maxSize = 5000000, -- Handle large files in Laravel
+        --   },
+        -- },
 
         lua_ls = {
           -- cmd = {...},
@@ -826,7 +946,17 @@ require('lazy').setup({
         --python = { 'isort', 'black' },
         c = { 'clang_format' },
         -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
+        javascript = { 'prettierd', 'prettier', stop_after_first = true },
+        typscript = { 'prettierd', 'prettier', stop_after_first = true },
+        --typescript = { 'prettierd', { args = { '--semi', 'true' } } },
+        --php = { 'pint' },
+        --blade = { 'blade-formatter' },
+        htmldjango = { 'djlint' },
+        --html = { 'prettierd' },
+        --python = { 'black' },
+        python = { 'autopep8' },
+        yaml = { 'prettierd' },
+        shell = { 'beautysh' },
       },
       formatters = {
         clang_format = {
@@ -838,6 +968,29 @@ require('lazy').setup({
             --'--style="{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4, NamespaceIndentation: All, FixNamespaceComments: false }"',
           },
         },
+        prettierd = {
+          cli_options = {
+            semi = true, -- Set this to true or false as needed
+          },
+        },
+        -- autopep8 = {
+        --   stdin = false, -- Disable stdin (default)
+        --   args = {
+        --     '--aggressive', -- Enable more aggressive fixes (optional)
+        --     '--max-line-length=79', -- Pycodestyle default line length (PEP 8)
+        --     --'--ignore=E226,E24,W50,W690', -- Common ignores (adjust as needed)
+        --     '$FILENAME',
+        --   },
+        -- },
+        black = {
+          stdin = false, -- Disable stdin (default)
+          args = { '--line-length=79', '--fast', '$FILENAME' }, -- $FILENAME is replaced by conform.nvim
+        },
+      },
+      format_on_save = {
+        lsp_fallback = true,
+        async = false,
+        timeout_ms = 10000, -- Set the timeout to 1000ms (1 second)
       },
     },
   },
@@ -915,6 +1068,7 @@ require('lazy').setup({
           -- you can uncomment the following lines
           --['<CR>'] = cmp.mapping.confirm { select = true },
           --['<Tab>'] = cmp.mapping.select_next_item(),
+          ['<Tab>'] = cmp.mapping.confirm(),
           --['<S-Tab>'] = cmp.mapping.select_prev_item(),
 
           -- Manually trigger a completion from nvim-cmp.
@@ -964,6 +1118,7 @@ require('lazy').setup({
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
     'folke/tokyonight.nvim',
+
     priority = 1000, -- Make sure to load this before all the other start plugins.
     init = function()
       -- Load the colorscheme here.
@@ -971,7 +1126,9 @@ require('lazy').setup({
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       --vim.cmd.colorscheme 'minicyan'
 
-      vim.cmd.colorscheme 'habamax'
+      --vim.cmd.colorscheme 'habamax'
+      vim.cmd.colorscheme 'quiet'
+      --vim.cmd.colorscheme 'quiet2'
       --vim.cmd.colorscheme 'tokyonight-night'
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
@@ -979,7 +1136,8 @@ require('lazy').setup({
   },
 
   -- Highlight todo, notes, etc in comments
-  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  -- { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = true } },
 
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
@@ -1006,11 +1164,11 @@ require('lazy').setup({
       -- set use_icons to true if you have a Nerd Font
       statusline.setup {
         use_icons = vim.g.have_nerd_font,
-        content = {
-          active = function()
-            return '%{ObsessionStatus()}'
-          end,
-        },
+        -- content = {
+        --   active = function()
+        --     return '%{ObsessionStatus()}'
+        --   end,
+        -- },
       }
 
       -- You can configure sections in the statusline by overriding their
